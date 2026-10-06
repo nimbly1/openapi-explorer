@@ -13,13 +13,6 @@ import './tag-input.js';
 import './syntax-highlighter.js';
 import json5 from 'json5';
 
-function exampleMap(example) {
-  if (!Array.isArray(example) || example.length === 0) {
-    return undefined;
-  }
-  return Object.fromEntries(example.map((value, index) => [index === 0 ? 'Example' : `Example${index + 1}`, { value }]));
-}
-
 const textFileRegex = RegExp('^font/|tar$|zip$|7z$|rtf$|msword$|excel$|/pdf$|/octet-stream$|^application/vnd.');
 const mediaFileRegex = RegExp('^audio/|^image/|^video/');
 
@@ -361,7 +354,7 @@ export default class ApiRequest extends LitElement {
     const paramSchema = getTypeInfo(param, { includeNulls: this.includeNulls });
 
     const examples = generateExample(
-      param.examples || param.example && { Example: { value: param.example } } || exampleMap(paramSchema.example),
+      param.examples || param.example && { Example: { value: param.example } } || paramSchema.examples || paramSchema.example && { Example: { value: paramSchema.example } },
       null, param.schema, null, false, true, 'json', false);
 
     const someExampleWithSummaryOrDescription = examples.some((x) => x.exampleSummary?.length > 0 || x.exampleDescription?.length > 0);

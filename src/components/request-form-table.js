@@ -78,8 +78,8 @@ function generateFormRows(data, options, dataType = 'object', key = '', descript
 function generatePrimitiveRow(rowData, parentRecursionOptions) {
   const { type, format, readOrWriteOnly, constraints, defaultValue, example, allowedValues, pattern, schemaDescription, schemaTitle, deprecated } = rowData;
   const { key, keyLabel, keyDescr, description, dataType, isRequired, options } = parentRecursionOptions;
-  const examples = Array.isArray(example) ? example : (example !== null && example !== undefined && example !== '' ? [example] : []);
-  const filledExample = examples.length ? examples[0] : undefined;
+  const exampleLabel = formatExamples(example);
+  const filledExample = Array.isArray(example) ? example[0] : example;
   const exampleFill = type === 'array' && Array.isArray(filledExample)
     ? filledExample.join('~|~')
     : (filledExample === null || filledExample === undefined ? '' : (typeof filledExample === 'string' ? filledExample : JSON.stringify(filledExample)));
@@ -143,11 +143,11 @@ function generatePrimitiveRow(rowData, parentRecursionOptions) {
       </td>
     </tr>
 
-    ${schemaDescription || examples.length ? html`<tr class="form-parameter-description">
+    ${schemaDescription || exampleLabel ? html`<tr class="form-parameter-description">
       <td> </td>
       <td colspan="2" style="margin-top:0; padding:0 5px 8px 5px;"> 
         <span class="m-markdown-small">${unsafeHTML(toMarkdown(schemaDescription || ''))}</span>
-        ${examples.length
+        ${exampleLabel
           ? html`<span>
             <span style="font-weight:bold"> Example: </span>
             <a part="anchor anchor-param-example"
@@ -160,7 +160,7 @@ function generatePrimitiveRow(rowData, parentRecursionOptions) {
                 }
                 this.computeCurlSyntax();
               }}">
-              ${formatExamples(examples)}
+              ${exampleLabel}
             </a>
           </span>`
         : ''}

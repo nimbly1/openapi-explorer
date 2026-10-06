@@ -163,28 +163,26 @@ export function toMarkdown(markdownStringRaw) {
   return markdownResult;
 }
 
-function displayExample(entry) {
+function convertToDisplayString(entry) {
   return typeof entry === 'string' ? entry : JSON.stringify(entry);
 }
 
-// `examples` is the list from getTypeInfo. A value that is not a list is one legacy example.
 export function formatExamples(examples) {
   if (Array.isArray(examples)) {
-    return examples.map(displayExample).join(' ┃ ');
+    return examples.map(convertToDisplayString).join(' ┃ ');
   }
   if (examples === null || examples === undefined || examples === '') {
     return '';
   }
-  return displayExample(examples);
+  return convertToDisplayString(examples);
 }
 
-// Placeholder text is the first example. An empty list has none.
 export function exampleText(examples) {
   const value = Array.isArray(examples) ? examples[0] : examples;
   if (value === null || value === undefined || value === '') {
     return '';
   }
-  return displayExample(value);
+  return convertToDisplayString(value);
 }
 
 export function getSanitizedUrl(urlString) {
