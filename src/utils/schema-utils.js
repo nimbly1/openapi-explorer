@@ -35,9 +35,7 @@ export function getTypeInfo(parameter, options = { includeNulls: false, enableEx
     }
   }
 
-  // The examples of OpenAPI 3.1 are a list, which would be displayed without anything between the entries
-  const examplesList = Array.isArray(schema.examples) ? schema.examples.map(e => typeof e === 'string' ? e : JSON.stringify(e)).join(' ┃ ') : schema.examples;
-  const examples = examplesList || schema.example || options?.enableExampleGeneration && getSampleValueByType(schema, null) || '';
+  const examples = schema.examples || schema.example || options?.enableExampleGeneration && getSampleValueByType(schema, null) || '';
   const info = {
     type: dataType,
     format,

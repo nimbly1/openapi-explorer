@@ -163,6 +163,11 @@ export function toMarkdown(markdownStringRaw) {
   return markdownResult;
 }
 
+// The examples of a schema are a list (OpenAPI 3.1), so separate them in the same way the allowed values are, with any that are not text written as JSON
+export function formatExamples(examples) {
+  return Array.isArray(examples) ? examples.map(e => typeof e === 'string' ? e : JSON.stringify(e)).join(' ┃ ') : examples;
+}
+
 export function getSanitizedUrl(urlString) {
   if (!urlString) {
     return '';

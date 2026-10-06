@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { html } from 'lit';
-import { toMarkdown } from '../utils/common-utils.js';
+import { toMarkdown, formatExamples } from '../utils/common-utils.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { isPatternProperty } from '../utils/schema-utils.js';
 import { map } from 'lit/directives/map.js';
@@ -156,7 +156,7 @@ function generatePrimitiveRow(rowData, parentRecursionOptions) {
                 }
                 this.computeCurlSyntax();
               }}">
-              ${type === 'array' ? example.join(', ') : example}
+              ${type === 'array' ? example.join(', ') : formatExamples(example)}
             </a>
             ${type === 'array' ? '] ' : ''}
           </span>`
