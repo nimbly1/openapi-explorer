@@ -6,12 +6,19 @@ import formatXml from 'xml-but-prettier';
 
 import { getI18nText } from '../languages/index.js';
 import { schemaInObjectNotation, getTypeInfo, generateExample, isPatternProperty } from '../utils/schema-utils.js';
-import { toMarkdown } from '../utils/common-utils.js';
+import { toMarkdown, exampleText } from '../utils/common-utils.js';
 import './schema-tree.js';
 import getRequestFormTable from './request-form-table.js';
 import './tag-input.js';
 import './syntax-highlighter.js';
 import json5 from 'json5';
+
+function exampleMap(example) {
+  if (!Array.isArray(example) || example.length === 0) {
+    return undefined;
+  }
+  return Object.fromEntries(example.map((value, index) => [index === 0 ? 'Example' : `Example${index + 1}`, { value }]));
+}
 
 const textFileRegex = RegExp('^font/|tar$|zip$|7z$|rtf$|msword$|excel$|/pdf$|/octet-stream$|^application/vnd.');
 const mediaFileRegex = RegExp('^audio/|^image/|^video/');
@@ -202,7 +209,7 @@ export default class ApiRequest extends LitElement {
                     data-param-serialize-style = "${paramStyle}"
                     data-param-serialize-explode = "${paramExplode}"
                     spellcheck = "false"
-                    placeholder="${generatedParamSchema.example || defaultVal || ''}"
+                    placeholder="${exampleText(generatedParamSchema.example) || defaultVal || ''}"
                     style = "width:100%; margin-top: 1rem; margin-bottom: 1rem;"
                     .value="${this.fillRequestWithDefault === 'true' ? defaultVal : ''}"></textarea>`
                 || generatedParamSchema.allowedValues && html`
@@ -224,7 +231,7 @@ export default class ApiRequest extends LitElement {
                     id="request-param-${paramName}"
                     aria-labelledby = "request-${paramName}-label"
                     @input="${() => { this.computeCurlSyntax(); }}"
-                    placeholder="${generatedParamSchema.example || defaultVal || ''}"
+                    placeholder="${exampleText(generatedParamSchema.example) || defaultVal || ''}"
                     class="request-param"
                     part="textbox textbox-param"
                     data-ptype="${paramLocation}"
@@ -354,7 +361,7 @@ export default class ApiRequest extends LitElement {
     const paramSchema = getTypeInfo(param, { includeNulls: this.includeNulls });
 
     const examples = generateExample(
-      param.examples || param.example && { Example: { value: param.example } } || paramSchema.examples || paramSchema.example && { Example: { value: paramSchema.example } },
+      param.examples || param.example && { Example: { value: param.example } } || exampleMap(paramSchema.example),
       null, param.schema, null, false, true, 'json', false);
 
     const someExampleWithSummaryOrDescription = examples.some((x) => x.exampleSummary?.length > 0 || x.exampleDescription?.length > 0);

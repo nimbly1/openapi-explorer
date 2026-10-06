@@ -163,9 +163,28 @@ export function toMarkdown(markdownStringRaw) {
   return markdownResult;
 }
 
-// The examples of a schema are a list (OpenAPI 3.1), so separate them in the same way the allowed values are, with any that are not text written as JSON
+function displayExample(entry) {
+  return typeof entry === 'string' ? entry : JSON.stringify(entry);
+}
+
+// `examples` is the list from getTypeInfo. A value that is not a list is one legacy example.
 export function formatExamples(examples) {
-  return Array.isArray(examples) ? examples.map(e => typeof e === 'string' ? e : JSON.stringify(e)).join(' ┃ ') : examples;
+  if (Array.isArray(examples)) {
+    return examples.map(displayExample).join(' ┃ ');
+  }
+  if (examples === null || examples === undefined || examples === '') {
+    return '';
+  }
+  return displayExample(examples);
+}
+
+// Placeholder text is the first example. An empty list has none.
+export function exampleText(examples) {
+  const value = Array.isArray(examples) ? examples[0] : examples;
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+  return displayExample(value);
 }
 
 export function getSanitizedUrl(urlString) {

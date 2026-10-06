@@ -78,6 +78,11 @@ function generateFormRows(data, options, dataType = 'object', key = '', descript
 function generatePrimitiveRow(rowData, parentRecursionOptions) {
   const { type, format, readOrWriteOnly, constraints, defaultValue, example, allowedValues, pattern, schemaDescription, schemaTitle, deprecated } = rowData;
   const { key, keyLabel, keyDescr, description, dataType, isRequired, options } = parentRecursionOptions;
+  const examples = Array.isArray(example) ? example : (example !== null && example !== undefined && example !== '' ? [example] : []);
+  const filledExample = examples.length ? examples[0] : undefined;
+  const exampleFill = type === 'array' && Array.isArray(filledExample)
+    ? filledExample.join('~|~')
+    : (filledExample === null || filledExample === undefined ? '' : (typeof filledExample === 'string' ? filledExample : JSON.stringify(filledExample)));
   if (readOrWriteOnly === '🆁') {
     return undefined;
   }
@@ -106,8 +111,8 @@ function generatePrimitiveRow(rowData, parentRecursionOptions) {
     <tr>
       ${inputFieldKeyLabel.call(this, key.startsWith('::OPTION'), keyLabel, keyDescr, dataType, deprecated, isRequired, schemaTitle, format || type, rowGenerator)}
 
-      ${dataType === 'array' ? getArrayFormField.call(this, keyLabel, example, defaultValue, format, rowGenerator) : ''}
-      ${dataType !== 'array' ? getPrimitiveFormField.call(this, keyLabel, example, defaultValue, format, options, rowGenerator) : ''}
+      ${dataType === 'array' ? getArrayFormField.call(this, keyLabel, filledExample, defaultValue, format, rowGenerator) : ''}
+      ${dataType !== 'array' ? getPrimitiveFormField.call(this, keyLabel, exampleFill, defaultValue, format, options, rowGenerator) : ''}
       <td>
         ${description ? html`<div class="param-description">${unsafeHTML(toMarkdown(description))}</div>` : ''}
         ${defaultValue || constraints || allowedValues || pattern
@@ -138,17 +143,16 @@ function generatePrimitiveRow(rowData, parentRecursionOptions) {
       </td>
     </tr>
 
-    ${schemaDescription || example ? html`<tr class="form-parameter-description">
+    ${schemaDescription || examples.length ? html`<tr class="form-parameter-description">
       <td> </td>
       <td colspan="2" style="margin-top:0; padding:0 5px 8px 5px;"> 
         <span class="m-markdown-small">${unsafeHTML(toMarkdown(schemaDescription || ''))}</span>
-        ${example
+        ${examples.length
           ? html`<span>
             <span style="font-weight:bold"> Example: </span>
-            ${type === 'array' ? '[ ' : ''}
             <a part="anchor anchor-param-example"
               data-example-type="${type === 'array' ? type : 'string'}"
-              data-example = "${Array.isArray(example) && example.join('~|~') || example || ''}"
+              data-example="${exampleFill}"
               @click="${(e) => {
                 const inputEl = e.target.closest('table').querySelector(`[data-pname="${keyLabel}"]`);
                 if (inputEl) {
@@ -156,9 +160,8 @@ function generatePrimitiveRow(rowData, parentRecursionOptions) {
                 }
                 this.computeCurlSyntax();
               }}">
-              ${type === 'array' ? example.join(', ') : formatExamples(example)}
+              ${formatExamples(examples)}
             </a>
-            ${type === 'array' ? '] ' : ''}
           </span>`
         : ''}
       </td>

@@ -22,14 +22,44 @@ test('schema-utils.js getTypeInfo hands the examples to the schema views as a li
   t.pass();
 });
 
-test('schema-utils.js getTypeInfo does not change a single example', t => {
-  expect(getTypeInfo({ type: 'string', example: 'apple' }).example).to.equal('apple');
-  // a single example of an array type is one value, so it is left for the caller to display
-  expect(getTypeInfo({ type: 'array', items: { type: 'string' }, example: ['a', 'b'] }).example).to.deep.equal(['a', 'b']);
+test('schema-utils.js getTypeInfo wraps a legacy example as one entry', t => {
+  expect(getTypeInfo({ type: 'string', example: 'apple' }).example).to.deep.equal(['apple']);
+  // The example value is an array, so the list has one entry and the value stays intact
+  expect(getTypeInfo({ type: 'array', items: { type: 'string' }, example: ['a', 'b'] }).example).to.deep.equal([['a', 'b']]);
+  expect(getTypeInfo({ type: 'integer', example: 0 }).example).to.deep.equal([0]);
+  expect(getTypeInfo({ type: 'boolean', example: false }).example).to.deep.equal([false]);
   t.pass();
 });
 
 test('schema-utils.js getTypeInfo prefers the examples over a single example', t => {
   expect(getTypeInfo({ type: 'string', examples: ['apple', 'banana'], example: 'pear' }).example).to.deep.equal(['apple', 'banana']);
+  t.pass();
+});
+
+test('schema-utils.js getTypeInfo uses a legacy example when the examples list is empty', t => {
+  expect(getTypeInfo({ type: 'string', examples: [], example: 'pear' }).example).to.deep.equal(['pear']);
+  t.pass();
+});
+
+test('schema-utils.js getTypeInfo reads values from an examples map', t => {
+  const info = getTypeInfo({
+    type: 'string',
+    examples: { red: { value: 'red' }, blue: { value: 'blue' }, none: { summary: 'missing value' } }
+  });
+
+  expect(info.example).to.deep.equal(['red', 'blue']);
+  t.pass();
+});
+
+test('schema-utils.js getTypeInfo returns an empty list when a schema has no example', t => {
+  expect(getTypeInfo({ type: 'string' }).example).to.deep.equal([]);
+  expect(JSON.parse(getTypeInfo({ type: 'string' }).html).example).to.deep.equal([]);
+  t.pass();
+});
+
+test('schema-utils.js getTypeInfo generates one example only when asked and none is present', t => {
+  expect(getTypeInfo({ type: 'string' }, { enableExampleGeneration: true }).example).to.deep.equal(['string']);
+  expect(getTypeInfo({ type: 'boolean' }, { enableExampleGeneration: true }).example).to.deep.equal([false]);
+  expect(getTypeInfo({ type: 'string', example: 'apple' }, { enableExampleGeneration: true }).example).to.deep.equal(['apple']);
   t.pass();
 });
